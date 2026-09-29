@@ -1,0 +1,177 @@
+.shell {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 28px;
+}
+
+.hero {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.hero h1 {
+  font-size: 28px;
+  margin: 0;
+}
+
+.hero p {
+  margin: 4px 0 0;
+  color: #687792;
+}
+
+.logo {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  color: white;
+  background: linear-gradient(135deg, #2854d6, #7c3aed);
+  font-weight: 900;
+}
+
+.section-title {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.sample-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 14px;
+}
+
+.sample-bar button {
+  padding: 6px 9px;
+  font-size: 12px;
+  background: #f2f5fb;
+  color: #33415f;
+}
+
+.field { margin-bottom: 12px; }
+
+.json-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.result-hero {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: start;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #edf0f6;
+  margin-bottom: 12px;
+}
+
+.result-hero h3 {
+  margin: 0 0 4px;
+  font-size: 22px;
+}
+
+.hash-line {
+  padding: 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  margin: 10px 0;
+}
+
+.hash-line strong {
+  display: block;
+  color: #536179;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.config-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.config-meta div {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 9px;
+}
+
+.config-meta span {
+  display: block;
+  font-size: 11px;
+  color: #687792;
+  margin-bottom: 3px;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.stat-box {
+  border: 1px solid #e1e7f2;
+  border-radius: 10px;
+  padding: 10px;
+  background: #fbfcff;
+}
+
+.stat-box b {
+  display: block;
+  font-size: 20px;
+}
+
+.stat-box span {
+  color: #687792;
+  font-size: 12px;
+}
+
+.bar-row {
+  display: grid;
+  grid-template-columns: minmax(160px, .8fr) 1fr 70px 70px;
+  gap: 10px;
+  align-items: center;
+  margin: 7px 0;
+  font-size: 13px;
+}
+
+.bar-track {
+  height: 12px;
+  background: #edf1f7;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #2854d6, #7c3aed);
+}
+
+.trace-panel {
+  margin-top: 14px;
+}
+
+.trace-panel h4 {
+  margin: 0 0 8px;
+}
+
+.formula {
+  background: #f8fafc;
+  border: 1px dashed #c8d4ef;
+  border-radius: 10px;
+  padding: 10px;
+  margin: 10px 0;
+  font-size: 13px;
+}
