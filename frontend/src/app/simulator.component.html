@@ -1,0 +1,157 @@
+<section class="grid">
+  <div class="card">
+    <h2>合成用户与参数</h2>
+    <p class="muted">盐值来自配置，不接受请求传入；刷新或重启只重复同一公式，不会重新抽签。</p>
+
+    <div class="quick-row">
+      <button type="button" (click)="useSample('syn-3340', true, 'US', 'free')">左边界 4999</button>
+      <button type="button" (click)="useSample('syn-15461', true, 'US', 'paid')">右边界 5000</button>
+      <button type="button" (click)="useSample('unknown-user-x', false, 'US', 'paid')">未知身份</button>
+      <button type="button" (click)="useSample('vip-001', true, 'CA', 'free')">白名单覆盖</button>
+    </div>
+
+    <label>用户标识
+      <input [(ngModel)]="userId" placeholder="stable-user-id" />
+    </label>
+    <label>互斥层
+      <select [(ngModel)]="layerId">
+        @for (layer of config()?.layers ?? []; track layer.id) {
+          <option [value]="layer.id">{{layer.namespace}} / {{layer.id}} / {{layer.name}}</option>
+        }
+      </select>
+    </label>
+    <div class="form-row">
+      <label>国家
+        <select [(ngModel)]="country">
+          <option>US</option>
+          <option>CA</option>
+        </select>
+      </label>
+      <label>套餐
+        <select [(ngModel)]="plan">
+          <option>free</option>
+          <option>paid</option>
+        </select>
+      </label>
+    </div>
+    <label class="checkbox">
+      <input type="checkbox" [(ngModel)]="registered" /> 已注册/可识别身份
+    </label>
+    <label>记录来源（仅合成数据）
+      <input [(ngModel)]="source" />
+    </label>
+    <div class="checkboxes">
+      <label class="checkbox"><input type="checkbox" [(ngModel)]="record" />保存分配结果</label>
+      <label class="checkbox"><input type="checkbox" [(ngModel)]="expose" [disabled]="!record" />同时记录曝光</label>
+    </div>
+    <button class="primary" (click)="decide()" [disabled]="loading()">计算分流路径</button>
+  </div>
+
+  <div class="card">
+    <h2>解释结果</h2>
+    @if (error()) {
+      <div class="alert">{{error()}}</div>
+    }
+    @if (result(); as response) {
+      @let d = response.decision;
+      <div [class.badge]="true" [class.ok]="d.status === 'assigned'" [class.bad]="d.status !== 'assigned'">
+        {{d.status === 'assigned' ? '进入实验' : '拒绝分配'}}
+        @if (d.reject_reason) { <strong>{{d.reject_reason}}</strong> }
+      </div>
+
+      <h3>最终路径</h3>
+      <ol class="path">
+        @for (item of d.path; track item) {<li>{{item}}</li>}
+      </ol>
+
+      <dl class="facts">
+        <dt>层哈希输入</dt><dd><code>{{d.hash_input}}</code></dd>
+        <dt>层哈希桶</dt><dd>{{d.bucket}} / {{d.layer?.bucket_size}}</dd>
+        @if (d.experiment) {
+          <dt>命中实验</dt><dd>{{d.experiment.id}} [{{d.experiment.start_bucket}}, {{d.experiment.end_bucket}})</dd>
+        }
+        @if (d.variant_hash_input) {
+          <dt>变体哈希输入</dt><dd><code>{{d.variant_hash_input}}</code></dd>
+          <dt>变体哈希桶</dt><dd>{{d.variant_bucket}} / {{d.layer?.bucket_size}}</dd>
+        }
+        @if (d.variant) {
+          <dt>最终分组</dt><dd>{{d.variant.id}} / {{d.variant.name}}</dd>
+        }
+        @if (d.whitelist) {
+          <dt>覆盖原因</dt><dd class="override">{{d.whitelist.reason}}</dd>
+        }
+      </dl>
+
+      <h3>逐步检查</h3>
+      <div class="timeline">
+        @for (step of d.steps; track step.name) {
+          <div class="step" [class.pass]="step.passed" [class.fail]="!step.passed">
+            <span>{{step.passed ? '✓' : '×'}}</span>
+            <div><strong>{{step.name}}</strong><p>{{step.detail}}</p></div>
+          </div>
+        }
+      </div>
+      <p class="muted">保存：{{response.recorded ? '是' : '否'}}；曝光：{{response.exposed ? '是' : '否'}}</p>
+    } @else {
+      <p class="empty">选择左侧样例后查看资格、互斥层、桶和最终变体。</p>
+    }
+  </div>
+</section>
+
+<section class="card">
+  <h2>互斥实验区间</h2>
+  <div class="bucket-scale">
+    @for (exp of config()?.experiments ?? []; track exp.id) {
+      <div class="bucket" [style.flex]="exp.end_bucket - exp.start_bucket">
+        <strong>{{exp.id}}</strong>
+        <span>[{{exp.start_bucket}}, {{exp.end_bucket}})</span>
+        <small>{{exp.name}}</small>
+      </div>
+    }
+  </div>
+</section>
+
+<section class="grid">
+  <div class="card">
+    <h2>批量合成用户统计</h2>
+    <label>用户数量
+      <input type="number" min="10" max="10000" [(ngModel)]="batchCount" />
+    </label>
+    <button class="primary" (click)="simulate()" [disabled]="loading()">运行只读模拟</button>
+    @if (simulation(); as sim) {
+      <h3>组别比例（总计 {{sim.count}}）</h3>
+      @for (entry of entries(sim.groups); track entry[0]) {
+        <div class="stat-row">
+          <span>{{entry[0]}}</span>
+          <div class="bar"><i [style.width.%]="sim.percentages[entry[0]]"></i></div>
+          <strong>{{entry[1]}} · {{sim.percentages[entry[0]] | number:'1.1-2'}}%</strong>
+        </div>
+      }
+      @for (entry of entries(sim.rejections); track entry[0]) {
+        <div class="stat-row rejected">
+          <span>{{entry[0]}}</span>
+          <div class="bar"><i [style.width.%]="sim.percentages[entry[0]]"></i></div>
+          <strong>{{entry[1]}} · {{sim.percentages[entry[0]] | number:'1.1-2'}}%</strong>
+        </div>
+      }
+    }
+  </div>
+
+  <div class="card">
+    <h2>已记录的合成数据统计</h2>
+    <button (click)="refresh()">刷新</button>
+    @if (stats(); as saved) {
+      <p>分配 {{saved.assignment_total}}；曝光 {{saved.exposure_total}}；白名单 {{saved.whitelist_assignments}}</p>
+      <h3>普通分组与曝光</h3>
+      @for (entry of entries(saved.assignments); track entry[0]) {
+        <div class="stat-row"><span>分配 {{entry[0]}}</span><strong>{{entry[1]}}</strong></div>
+      }
+      @for (entry of entries(saved.exposures); track entry[0]) {
+        <div class="stat-row"><span>曝光 {{entry[0]}}</span><strong>{{entry[1]}}</strong></div>
+      }
+      @for (entry of entries(saved.rejections); track entry[0]) {
+        <div class="stat-row rejected"><span>拒绝 {{entry[0]}}</span><strong>{{entry[1]}}</strong></div>
+      }
+    }
+  </div>
+</section>
